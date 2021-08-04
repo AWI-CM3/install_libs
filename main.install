@@ -7,10 +7,10 @@
 # Configuration
 
 # Which libraries shall be installed?
-switch_szip=true
-switch_hdf5=true
-switch_netcdfc=true
-switch_netcdff=true
+switch_szip=false
+switch_hdf5=false
+switch_netcdfc=false
+switch_netcdff=false
 switch_eccodes=true
 
 # Which versions shall be installed?
@@ -18,7 +18,7 @@ version_szip=2.1.1
 version_hdf5=1.10.5
 version_netcdfc=4.7.4
 version_netcdff=4.5.3
-version_eccodes=2.21.1
+version_eccodes=2.22.1
 
 # Where should the tarballs be downloaded from?
 site_szip=https://support.hdfgroup.org/ftp/lib-external/szip/
