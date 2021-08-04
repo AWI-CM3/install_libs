@@ -31,9 +31,9 @@ site_netcdff=ftp://ftp.unidata.ucar.edu/pub/netcdf/
 site_eccodes=https://confluence.ecmwf.int/download/attachments/45757960/
 
 # Which server are we installing on?
-source config.ollie@awi.de
+#source config.ollie@awi.de
 #source config.juwels@fz-juelich.de
-#source config.mistral@dkrz.de
+source config.mistral@dkrz.de
 #source config.aleph@iccp.kr
 
 
@@ -134,7 +134,7 @@ if [ "$switch_netcdfc" = true ] ; then
 
 	pushd netcdf-c-${version_netcdfc}
 
-	CC=${CC} CPPFLAGS=-I${HDF5_ROOT}/include LDFLAGS=-L${HDF5_ROOT}/lib ./configure \
+	CC=${CC} CPPFLAGS=-I${prefix}/include LDFLAGS=-L${prefix}/lib ./configure \
 		--enable-netcdf4 \
 		--disable-dap \
 		--prefix=${prefix} 2>&1 | tee netcdf_configure.log
@@ -163,7 +163,7 @@ if [ "$switch_netcdff" = true ] ; then
 	tar zxf netcdf-fortran-${version_netcdff}.tar.gz
 
 	pushd netcdf-fortran-${version_netcdff}
-	FC=${FC} CC=${CC} CPPFLAGS=-I${build_dir}/include LDFLAGS=-L${build_dir}/lib ./configure \
+	FC=${FC} CC=${CC} CPPFLAGS=-I${prefix}/include LDFLAGS=-L${prefix}/lib ./configure \
 		--prefix=${prefix} 2>&1 | tee netcdff_configure.log
 
 	make all 2>&1 | tee netcdff_compile.log
@@ -198,6 +198,7 @@ if [ "$switch_eccodes" = true ] ; then
 	      -DENABLE_PNG=OFF                \
 	      -DENABLE_PYTHON=ON              \
 	      -DENABLE_FORTRAN=ON             \
+          -DECBUILD_DISABLE_RPATH_FIX=ON  \
 	      -DBUILD_SHARED_LIBS=BOTH
 
 	make -j 4 | tee eccodes_make.out
