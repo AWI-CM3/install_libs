@@ -27,18 +27,12 @@ site_netcdfc=ftp://ftp.unidata.ucar.edu/pub/netcdf/
 site_netcdff=ftp://ftp.unidata.ucar.edu/pub/netcdf/
 site_eccodes=https://confluence.ecmwf.int/download/attachments/45757960/
 
-# What are the installation paths?
-prefix=/p/project/chhb19/streffing1/software/HPC_libraries/intel2019.3.199_parastation_5.4.4-1-mt_20210802/ 
-build_dir=/p/project/chhb19/streffing1/software/HPC_libraries/intel2019.3.199_parastation_5.4.4-1-mt_20210802/build/
+# Which server are we installing on?
+source config.ollie@awi.de
+#source config.juwels@fz-juelich.de
+#source config.mistral@dkrz.de
+#source config.aleph@iccp.kr
 
-# Which modules shall be loaded from the HPC system
-module --force purge
-module use /gpfs/software/juwels/otherstages
-module load Stages/2019a
-module load Intel/2019.3.199-GCC-8.3.0
-module load ParaStationMPI/5.4.4-1-mt
-module load CMake
-module load Python/3.6.8
 
 # End of user configuration
 #=================================================================#
@@ -54,9 +48,9 @@ if [ "$switch_szip" = true ] ; then
 	wget -nc ${url}
 	tar xzf szip-${version_szip}.tar.gz
 
-	pushd szip-${version:szip}
+	pushd szip-${version_szip}
 
-	CC=mpicc CFLAGS=-w ./configure \
+	CC=${CC} CFLAGS=-w ./configure \
 	--prefix=${prefix} 2>&1 | tee szip_configure.log
 
 	make all 2>&1 | tee szip_compile.log
@@ -82,7 +76,7 @@ if [ "$switch_hdf5" = true ] ; then
 
 	pushd hdf5-${version_hdf5}
 
-	CC=mpicc CFLAGS=-w ./configure \
+	CC=${CC} CFLAGS=-w ./configure \
 	  --disable-static \
 	  --enable-parallel \
 	  --enable-fortran \
@@ -111,7 +105,7 @@ if [ "$switch_netcdfc" = true ] ; then
 
 	pushd netcdf-c-${version_netcdfc}
 
-	CC=mpicc CPPFLAGS=-I${HDF5_ROOT}/include LDFLAGS=-L${HDF5_ROOT}/lib ./configure \
+	CC=${CC} CPPFLAGS=-I${HDF5_ROOT}/include LDFLAGS=-L${HDF5_ROOT}/lib ./configure \
 		--enable-netcdf4 \
 		--disable-dap \
 		--prefix=${prefix} 2>&1 | tee netcdf_configure.log
@@ -140,7 +134,7 @@ if [ "$switch_netcdff" = true ] ; then
 	tar zxf netcdf-fortran-${version_netcdff}.tar.gz
 
 	pushd netcdf-fortran-${version_netcdff}
-	FC=mpifort CC=mpicc CPPFLAGS=-I${build_dir}/include LDFLAGS=-L${build_dir}/lib ./configure \
+	FC=${FC} CC=${CC} CPPFLAGS=-I${build_dir}/include LDFLAGS=-L${build_dir}/lib ./configure \
 		--prefix=${prefix} 2>&1 | tee netcdff_configure.log
 
 	make all 2>&1 | tee netcdff_compile.log
@@ -166,8 +160,8 @@ if [ "$switch_eccodes" = true ] ; then
 	tar zxf eccodes-${version_eccodes}-Source.tar.gz
 
 	cmake eccodes-${version_eccodes}-Source       \
-	      -DCMAKE_C_COMPILER=mpicc       \
-	      -DCMAKE_Fortran_COMPILER=mpifort \
+	      -DCMAKE_C_COMPILER=${CC}       \
+	      -DCMAKE_Fortran_COMPILER=${FC} \
 	      -DCMAKE_INSTALL_PREFIX:PATH=${prefix}   \
 	      -DENABLE_NETCDF=ON              \
 	      -DENABLE_ECCODES_OMP_THREADS=ON \
