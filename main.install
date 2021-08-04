@@ -1,24 +1,37 @@
+#!/bin/bash
 # Script that downloads and installs the libraries required to install and run for AWI-CM3
 # Needs c and fortran compilers, as well as MPI distribution already available
 
 #=================================================================#
 #=================================================================#
 # Configuration
+
+# Which libraries shall be installed?
+switch_szip=true
+switch_hdf5=true
+switch_netcdfc=true
+switch_netcdff=true
+switch_eccodes=true
+
+# Which versions shall be installed?
 version_szip=2.1.1
 version_hdf5=1.10.5
 version_netcdfc=4.7.4
 version_netcdff=4.5.3
 version_eccodes=2.21.1
 
+# Where should the tarballs be downloaded from?
 site_szip=https://support.hdfgroup.org/ftp/lib-external/szip/
 site_hdf5=https://support.hdfgroup.org/ftp/HDF5/releases/hdf5-1.10/ #Note: this is the release version, not the package version
 site_netcdfc=ftp://ftp.unidata.ucar.edu/pub/netcdf/
 site_netcdff=ftp://ftp.unidata.ucar.edu/pub/netcdf/
 site_eccodes=https://confluence.ecmwf.int/download/attachments/45757960/
 
+# What are the installation paths?
 prefix=/p/project/chhb19/streffing1/software/HPC_libraries/intel2019.3.199_parastation_5.4.4-1-mt_20210802/ 
 build_dir=/p/project/chhb19/streffing1/software/HPC_libraries/intel2019.3.199_parastation_5.4.4-1-mt_20210802/build/
 
+# Which modules shall be loaded from the HPC system
 module --force purge
 module use /gpfs/software/juwels/otherstages
 module load Stages/2019a
@@ -28,145 +41,160 @@ module load CMake
 module load Python/3.6.8
 
 # End of user configuration
-
 #=================================================================#
 #=================================================================#
 # Install SZIP
 
-url=${site_szip}/${version_szip}/src/szip-${version_szip}.tar.gz
+if [ "$switch_szip" = true ] ; then
+	url=${site_szip}/${version_szip}/src/szip-${version_szip}.tar.gz
 
-mkdir -p ${build_dir}
-pushd ${build_dir}
+	mkdir -p ${build_dir}
+	pushd ${build_dir}
 
-wget -nc ${url}
-tar xzf szip-${version_szip}.tar.gz
+	wget -nc ${url}
+	tar xzf szip-${version_szip}.tar.gz
 
-pushd szip-${version:szip}
+	pushd szip-${version:szip}
 
-CC=mpicc CFLAGS=-w ./configure \
-  --prefix=${prefix} 2>&1 | tee szip_configure.log
+	CC=mpicc CFLAGS=-w ./configure \
+	--prefix=${prefix} 2>&1 | tee szip_configure.log
 
-make all 2>&1 | tee szip_compile.log
-make install 2>&1 | tee szip_install.log
+	make all 2>&1 | tee szip_compile.log
+	make install 2>&1 | tee szip_install.log
+
+	popd
+	popd
+fi
 export SZIP_ROOT=$prefix
-
-popd
-popd
 
 #=================================================================#
 #=================================================================#
 # Install HDF5 1.10.5 with parallel I/O 
 
-url=${site_hdf5}/hdf5-${version_hdf5}/src/hdf5-${version_hdf5}.tar.gz
+if [ "$switch_hdf5" = true ] ; then
+	url=${site_hdf5}/hdf5-${version_hdf5}/src/hdf5-${version_hdf5}.tar.gz
 
-mkdir -p ${build_dir}
-pushd ${build_dir}
+	mkdir -p ${build_dir}
+	pushd ${build_dir}
 
-wget -nc ${url}
-tar xzf hdf5-${version_hdf5}.tar.gz
+	wget -nc ${url}
+	tar xzf hdf5-${version_hdf5}.tar.gz
 
-pushd hdf5-${version_hdf5}
+	pushd hdf5-${version_hdf5}
 
-CC=mpicc CFLAGS=-w ./configure \
-  --disable-static \
-  --enable-parallel \
-  --prefix=${prefix} 2>&1 | tee hdf5_configure.log
+	CC=mpicc CFLAGS=-w ./configure \
+	  --disable-static \
+	  --enable-parallel \
+	  --enable-fortran \
+	  --prefix=${prefix} 2>&1 | tee hdf5_configure.log
 
-make all 2>&1 | tee hdf5_compile.log
-make install 2>&1 | tee hdf5_install.log
+	make all 2>&1 | tee hdf5_compile.log
+	make install 2>&1 | tee hdf5_install.log
+
+	popd
+	popd
+fi
 export HDF5_ROOT=$prefix
-
-popd
-popd
 
 #=================================================================#
 #=================================================================#
 # Install parallel NetCDF using parallel HDF5
 
-url=${site_netcdfc}/netcdf-c-${version_netcdfc}.tar.gz
+if [ "$switch_netcdfc" = true ] ; then
+	url=${site_netcdfc}/netcdf-c-${version_netcdfc}.tar.gz
 
-mkdir -p ${build_dir}
-pushd ${build_dir}
+	mkdir -p ${build_dir}
+	pushd ${build_dir}
 
-wget -nc ${url}
-tar zxf netcdf-c-${version_netcdfc}.tar.gz
+	wget -nc ${url}
+	tar zxf netcdf-c-${version_netcdfc}.tar.gz
 
-pushd netcdf-c-${version_netcdfc}
+	pushd netcdf-c-${version_netcdfc}
 
-CC=mpicc CPPFLAGS=-I${HDF5_ROOT}/include LDFLAGS=-L${HDF5_ROOT}/lib ./configure \
-        --enable-netcdf4 \
-        --disable-dap \
-        --prefix=${prefix} 2>&1 | tee netcdf_configure.log
+	CC=mpicc CPPFLAGS=-I${HDF5_ROOT}/include LDFLAGS=-L${HDF5_ROOT}/lib ./configure \
+		--enable-netcdf4 \
+		--disable-dap \
+		--prefix=${prefix} 2>&1 | tee netcdf_configure.log
 
-make all 2>&1 | tee netcdf_compile.log
-make install 2>&1 | tee netcdf_install.log
+	make all 2>&1 | tee netcdf_compile.log
+	make install 2>&1 | tee netcdf_install.log
 
+	popd
+	popd
+fi
 export NetCDF_C_ROOT=$prefix
 export LD_LIBRARY_PATH=${NetCDF_C_ROOT}/lib:${LD_LIBRARY_PATH}
-
-popd
-popd
 
 
 #=================================================================#
 #=================================================================#
 # Install NetCDF Fortran
-url=${site_netcdff}/netcdf-fortran-${version_netcdff}.tar.gz
 
-mkdir -p ${build_dir}
-pushd ${build_dir}
+if [ "$switch_netcdff" = true ] ; then
+	url=${site_netcdff}/netcdf-fortran-${version_netcdff}.tar.gz
 
-wget -nc ${url}
-tar zxf netcdf-fortran-${version_netcdff}.tar.gz
+	mkdir -p ${build_dir}
+	pushd ${build_dir}
 
-pushd netcdf-fortran-${version_netcdff}
-FC=mpifort CC=mpicc CPPFLAGS=-I${build_dir}/include LDFLAGS=-L${build_dir}/lib ./configure \
-        --prefix=${prefix} 2>&1 | tee netcdff_configure.log
+	wget -nc ${url}
+	tar zxf netcdf-fortran-${version_netcdff}.tar.gz
 
-make all 2>&1 | tee netcdff_compile.log
-make install 2>&1 | tee netcdff_install.log
+	pushd netcdf-fortran-${version_netcdff}
+	FC=mpifort CC=mpicc CPPFLAGS=-I${build_dir}/include LDFLAGS=-L${build_dir}/lib ./configure \
+		--prefix=${prefix} 2>&1 | tee netcdff_configure.log
 
+	make all 2>&1 | tee netcdff_compile.log
+	make install 2>&1 | tee netcdff_install.log
+
+	popd
+	popd
+fi
 export NetCDF_FORTRAN_ROOT=$prefix
-
-popd
-popd
 
 
 #=================================================================#
 #=================================================================#
 #Installing eccodes
 
-cd ${build_dir}
-mkdir -p sources
-cd sources
+if [ "$switch_eccodes" = true ] ; then
+	cd ${build_dir}
+	mkdir -p sources
+	cd sources
 
-url=${site_eccodes}/eccodes-${version}-Source.tar.gz
+	url=${site_eccodes}/eccodes-${version_eccodes}-Source.tar.gz
 
-mkdir -p ${build_dir}
-pushd ${build_dir}
+	mkdir -p ${build_dir}
+	pushd ${build_dir}
 
-wget -nc ${url}
-tar zxf eccodes-${version}-Source.tar.gz
-cd ..
+	wget -nc ${url}
+	tar zxf eccodes-${version_eccodes}-Source.tar.gz
+	cd ..
 
 
-cmake eccodes-${version}-Source       \
-      -DCMAKE_C_COMPILER=mpicc       \
-      -DCMAKE_Fortran_COMPILER=mpifort \
-      -DCMAKE_INSTALL_PREFIX:PATH=${build_dir}   \
-      -DENABLE_NETCDF=ON              \
-      -DENABLE_ECCODES_OMP_THREADS=ON \
-      -DENABLE_JPG=OFF                \
-      -DENABLE_PNG=OFF                \
-      -DENABLE_PYTHON=ON              \
-      -DENABLE_FORTRAN=ON             \
-      -DBUILD_SHARED_LIBS=BOTH
+	cmake eccodes-${version_eccodes}-Source       \
+	      -DCMAKE_C_COMPILER=mpicc       \
+	      -DCMAKE_Fortran_COMPILER=mpifort \
+	      -DCMAKE_INSTALL_PREFIX:PATH=${build_dir}   \
+	      -DENABLE_NETCDF=ON              \
+	      -DENABLE_ECCODES_OMP_THREADS=ON \
+	      -DENABLE_JPG=OFF                \
+	      -DENABLE_PNG=OFF                \
+	      -DENABLE_PYTHON=ON              \
+	      -DENABLE_FORTRAN=ON             \
+	      -DBUILD_SHARED_LIBS=BOTH
 
-make -j 4 | tee make.out
+	make -j 4 | tee make.out
 
-make check | tee check.out
+	make check | tee check.out
 
-make install | tee install.out
+	make install | tee install.out
 
-cd ..
+	cd ..
+fi
 
+#=================================================================#
+#=================================================================#
+
+printf "============================="
+printf "Library installation finished"
+printf "============================="
