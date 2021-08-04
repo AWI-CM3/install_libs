@@ -7,10 +7,10 @@
 # Configuration
 
 # Which libraries shall be installed?
-switch_szip=false
-switch_hdf5=false
-switch_netcdfc=false
-switch_netcdff=false
+switch_szip=true
+switch_hdf5=true
+switch_netcdfc=true
+switch_netcdff=true
 switch_eccodes=true
 
 # Which versions shall be installed?
@@ -157,24 +157,18 @@ export NetCDF_FORTRAN_ROOT=$prefix
 #Installing eccodes
 
 if [ "$switch_eccodes" = true ] ; then
-	cd ${build_dir}
-	mkdir -p sources
-	cd sources
-
 	url=${site_eccodes}/eccodes-${version_eccodes}-Source.tar.gz
 
 	mkdir -p ${build_dir}
-	pushd ${build_dir}
+	cd ${build_dir}
 
 	wget -nc ${url}
 	tar zxf eccodes-${version_eccodes}-Source.tar.gz
-	cd ..
-
 
 	cmake eccodes-${version_eccodes}-Source       \
 	      -DCMAKE_C_COMPILER=mpicc       \
 	      -DCMAKE_Fortran_COMPILER=mpifort \
-	      -DCMAKE_INSTALL_PREFIX:PATH=${build_dir}   \
+	      -DCMAKE_INSTALL_PREFIX:PATH=${prefix}   \
 	      -DENABLE_NETCDF=ON              \
 	      -DENABLE_ECCODES_OMP_THREADS=ON \
 	      -DENABLE_JPG=OFF                \
@@ -189,7 +183,6 @@ if [ "$switch_eccodes" = true ] ; then
 
 	make install | tee install.out
 
-	cd ..
 fi
 
 #=================================================================#
