@@ -7,6 +7,7 @@
 # Configuration
 
 # Which libraries shall be installed?
+switch_zlib=true
 switch_szip=true
 switch_hdf5=true
 switch_netcdfc=true
@@ -14,6 +15,7 @@ switch_netcdff=true
 switch_eccodes=true
 
 # Which versions shall be installed?
+version_zlib=1.2.11
 version_szip=2.1.1
 version_hdf5=1.10.5
 version_netcdfc=4.7.4
@@ -21,6 +23,7 @@ version_netcdff=4.5.3
 version_eccodes=2.22.1
 
 # Where should the tarballs be downloaded from?
+site_zlib=https://zlib.net/
 site_szip=https://support.hdfgroup.org/ftp/lib-external/szip/
 site_hdf5=https://support.hdfgroup.org/ftp/HDF5/releases/hdf5-1.10/ #Note: this is the release version, not the package version
 site_netcdfc=ftp://ftp.unidata.ucar.edu/pub/netcdf/
@@ -35,6 +38,32 @@ source config.ollie@awi.de
 
 
 # End of user configuration
+#=================================================================#
+#=================================================================#
+# Install ZLIB
+
+if [ "$switch_zlib" = true ] ; then
+	url=${site_zlib}/zlib-${version_zlib}.tar.gz
+
+	mkdir -p ${build_dir}
+	pushd ${build_dir}
+
+	wget -nc ${url}
+	tar xzf zlib-${version_zlib}.tar.gz
+
+	pushd zlib-${version_zlib}
+
+	CC=${CC} CFLAGS=-w ./configure \
+	--prefix=${prefix} 2>&1 | tee zlib_configure.log
+
+	make all 2>&1 | tee zlib_compile.log
+	make install 2>&1 | tee zlib_install.log
+
+	popd
+	popd
+fi
+export ZLIB_ROOT=$prefix
+
 #=================================================================#
 #=================================================================#
 # Install SZIP
@@ -171,11 +200,11 @@ if [ "$switch_eccodes" = true ] ; then
 	      -DENABLE_FORTRAN=ON             \
 	      -DBUILD_SHARED_LIBS=BOTH
 
-	make -j 4 | tee make.out
+	make -j 4 | tee eccodes_make.out
 
-	make check | tee check.out
+	make check | tee eccodes_check.out
 
-	make install | tee install.out
+	make install | tee eccodes_install.out
 
 fi
 
