@@ -1,0 +1,18 @@
+#!/bin/bash
+# What are the installation paths? 
+prefix=/p/project/chhb19/streffing1/software/HPC_libraries/intel2020.2.254_OpenMPI_4.1.0rc1_20210920/  
+build_dir=/p/project/chhb19/streffing1/software/HPC_libraries/intel2020.2.254_OpenMPI_4.1.0rc1_20210920/build/
+ 
+# Which modules shall be loaded from the HPC system 
+module --force purge
+module use /gpfs/software/juwels/otherstages
+module load Stages/2020
+module load Intel/2020.2.254-GCC-9.3.0
+module load OpenMPI/4.1.0rc1
+module load CMake/3.18.0
+module load Python/3.8.5
+module load imkl/2020.2.254
+module load Perl/5.32.0
+
+CC=mpicc
+FC=mpifort
