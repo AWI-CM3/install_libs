@@ -7,13 +7,13 @@
 # Configuration
 
 # Which libraries shall be installed?
-switch_zlib=false
-switch_szip=false
-switch_hdf5=false
-switch_netcdfc=false
-switch_netcdff=false
-switch_eccodes=false
-switch_grads=false
+switch_zlib=true
+switch_szip=true
+switch_hdf5=true
+switch_netcdfc=true
+switch_netcdff=true
+switch_eccodes=true
+switch_grads=true
 switch_perl=true
 
 # Which versions shall be installed?
