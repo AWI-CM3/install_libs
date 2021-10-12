@@ -7,13 +7,14 @@
 # Configuration
 
 # Which libraries shall be installed?
-switch_zlib=true
-switch_szip=true
-switch_hdf5=true
-switch_netcdfc=true
-switch_netcdff=true
-switch_eccodes=true
-switch_grads=true
+switch_zlib=false
+switch_szip=false
+switch_hdf5=false
+switch_netcdfc=false
+switch_netcdff=false
+switch_eccodes=false
+switch_grads=false
+switch_perl=true
 
 # Which versions shall be installed?
 version_zlib=1.2.11
@@ -23,6 +24,7 @@ version_netcdfc=4.7.4
 version_netcdff=4.5.3
 version_eccodes=2.22.1
 version_grads=2.2.1
+version_perl=5.32.0
 
 # Where should the tarballs be downloaded from?
 site_zlib=https://zlib.net/
@@ -31,12 +33,13 @@ site_hdf5=https://support.hdfgroup.org/ftp/HDF5/releases/hdf5-1.10/ #Note: this 
 site_netcdfc=ftp://ftp.unidata.ucar.edu/pub/netcdf/
 site_netcdff=ftp://ftp.unidata.ucar.edu/pub/netcdf/
 site_eccodes=https://confluence.ecmwf.int/download/attachments/45757960/
-site_grads=ftp://cola.gmu.edu/grads/2.2/ #Note: this is the release version, not the package version
+site_grads=ftp://cola.gmu.edu/grads/2.2/ #Note: this 2.2 is the release version, not the package version
+site_perl=http://www.cpan.org/src/5.0/ #Note: this 5.0 is the release version, not the package version
 
 # Which server are we installing on?
-#source config.ollie@awi.de
+source config.ollie@awi.de
 #source config.juwels@fz-juelich.de
-source config.juwels-2020ps@fz-juelich.de
+#source config.juwels-2020ps@fz-juelich.de
 #source config.juwels-2020op@fz-juelich.de
 #source config.mistral@dkrz.de
 #source config.aleph@iccp.kr
@@ -245,6 +248,7 @@ export GRADS_ROOT=$prefix
 
 #=================================================================#
 #=================================================================#
+
 
 printf "============================="
 printf "Library installation finished"
