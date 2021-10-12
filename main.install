@@ -257,8 +257,7 @@ if [ "$switch_perl" = true ] ; then
 	tar zxf perl-${version_perl}.tar.gz
 
 	pushd perl-${version_perl}
-	FC=${FC} CC=${CC} CPPFLAGS=-I${prefix}/include LDFLAGS=-L${prefix}/lib ./configure \
-		--prefix=${prefix} 2>&1 | tee perl_configure.log
+	./Configure -des -Dprefix=${prefix}/perl-${version_perl} -Dotherlibdirs=${prefix}/lib
 
 	make all 2>&1 | tee perl_compile.log
 	make install 2>&1 | tee perl_install.log
