@@ -264,6 +264,8 @@ if [ "$switch_perl" = true ] ; then
 
 	make all 2>&1 | tee perl_compile.log
 	make install 2>&1 | tee perl_install.log
+	
+	curl -sL https://cpanmin.us | ${prefix}/perl-${version_perl}/bin/perl - --notest -l ${prefix}/perl-${version_perl} App::cpanminus Time::Piece URI
 
 	popd
 	popd
