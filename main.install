@@ -245,10 +245,31 @@ fi
 export GRADS_ROOT=$prefix
 
 
-
 #=================================================================#
 #=================================================================#
 
+# Install Perl
+
+if [ "$switch_perl" = true ] ; then
+	url=${site_perl}/perl-${version_perl}.tar.gz
+
+	mkdir -p ${build_dir}
+	pushd ${build_dir}
+
+	wget -nc ${url}
+	tar zxf perl-${version_perl}.tar.gz
+
+	pushd perl-${version_perl}
+	FC=${FC} CC=${CC} CPPFLAGS=-I${prefix}/include LDFLAGS=-L${prefix}/lib ./configure \
+		--prefix=${prefix} 2>&1 | tee perl_configure.log
+
+	make all 2>&1 | tee perl_compile.log
+	make install 2>&1 | tee perl_install.log
+
+	popd
+	popd
+fi
+export PERL_ROOT=$prefix
 
 printf "============================="
 printf "Library installation finished"
