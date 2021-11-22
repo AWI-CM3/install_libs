@@ -37,7 +37,8 @@ site_grads=ftp://cola.gmu.edu/grads/2.2/ #Note: this 2.2 is the release version,
 site_perl=http://www.cpan.org/src/5.0/ #Note: this 5.0 is the release version, not the package version
 
 # Which server are we installing on?
-source config.ollie@awi.de
+#source config.ollie_intelmpi@awi.de
+source config.ollie_openmpi@awi.de
 #source config.juwels@fz-juelich.de
 #source config.juwels-2020ps@fz-juelich.de
 #source config.juwels-2020op@fz-juelich.de
@@ -214,7 +215,7 @@ if [ "$switch_eccodes" = true ] ; then
 	make check | tee eccodes_check.out
 
 	make install | tee eccodes_install.out
-	ln -s $prefix/lib64* $prefix/lib/
+	ln -s $prefix/lib64/* $prefix/lib/
 fi
 
 
