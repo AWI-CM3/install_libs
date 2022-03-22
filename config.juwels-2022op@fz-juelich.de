@@ -1,0 +1,17 @@
+#!/bin/bash
+# What are the installation paths? 
+prefix=/p/project/chhb21/HPC_libraries/intel-2021.4.0_openmpi-4.1.2_20220129/
+build_dir=/p/project/chhb21/HPC_libraries/intel-2021.4.0_openmpi-4.1.2_20220129/build/
+ 
+# Which modules shall be loaded from the HPC system 
+module --force purge
+module use /gpfs/software/juwels/otherstages
+module load Stages/2022
+module load Intel/2021.4.0
+module load OpenMPI/4.1.2
+module load CMake/3.21.1
+module load imkl/2021.4.0
+module load Perl/5.34.0
+
+CC=mpicc
+FC=mpifort

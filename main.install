@@ -12,8 +12,7 @@ switch_szip=true
 switch_hdf5=true
 switch_netcdfc=true
 switch_netcdff=true
-switch_eccodes=true
-switch_grads=true
+switch_eccodes=true # Until here is enough for running the model. The rest is just for Grads / Climate performance indicies calculation.
 
 # Which versions shall be installed?
 version_zlib=1.2.11
@@ -22,7 +21,6 @@ version_hdf5=1.10.5
 version_netcdfc=4.7.4
 version_netcdff=4.5.3
 version_eccodes=2.22.1
-version_grads=2.2.1
 
 # Where should the tarballs be downloaded from?
 site_zlib=https://zlib.net/
@@ -31,21 +29,23 @@ site_hdf5=https://support.hdfgroup.org/ftp/HDF5/releases/hdf5-1.10/ #Note: this 
 site_netcdfc=ftp://ftp.unidata.ucar.edu/pub/netcdf/
 site_netcdff=ftp://ftp.unidata.ucar.edu/pub/netcdf/
 site_eccodes=https://confluence.ecmwf.int/download/attachments/45757960/
-site_grads=ftp://cola.gmu.edu/grads/2.2/ #Note: this is the release version, not the package version
 
 # Which server are we installing on?
 #source config.ollie@awi.de
 #source config.juwels@fz-juelich.de
-source config.juwels-2020ps@fz-juelich.de
+#source config.juwels-2020ps@fz-juelich.de
 #source config.juwels-2020op@fz-juelich.de
+#source config.juwels-2022ps@fz-juelich.de
+source config.juwels-2022op@fz-juelich.de
 #source config.mistral@dkrz.de
 #source config.aleph@iccp.kr
 
+export PKG_CONFIG_PATH="$prefix:$PKG_CONFIG_PATH/lib/pkgconfig"
 
 # End of user configuration
-#=================================================================#
-#=================================================================#
-# Install ZLIB
+printf "#=================================================================#\n"
+printf "#=================================================================#\n"
+printf "# Install ZLIB\n\n\n"
 
 if [ "$switch_zlib" = true ] ; then
 	url=${site_zlib}/zlib-${version_zlib}.tar.gz
@@ -69,9 +69,9 @@ if [ "$switch_zlib" = true ] ; then
 fi
 export ZLIB_ROOT=$prefix
 
-#=================================================================#
-#=================================================================#
-# Install SZIP
+printf "#=================================================================#\n"
+printf "#=================================================================#\n"
+printf "# Install SZIP\n\n\n"
 
 if [ "$switch_szip" = true ] ; then
 	url=${site_szip}/${version_szip}/src/szip-${version_szip}.tar.gz
@@ -95,9 +95,10 @@ if [ "$switch_szip" = true ] ; then
 fi
 export SZIP_ROOT=$prefix
 
-#=================================================================#
-#=================================================================#
-# Install HDF5 1.10.5 with parallel I/O 
+
+printf "#=================================================================#\n"
+printf "#=================================================================#\n"
+printf "# Install HDF5 1.10.5 with parallel I/O\n\n\n"
 
 if [ "$switch_hdf5" = true ] ; then
 	url=${site_hdf5}/hdf5-${version_hdf5}/src/hdf5-${version_hdf5}.tar.gz
@@ -124,9 +125,10 @@ if [ "$switch_hdf5" = true ] ; then
 fi
 export HDF5_ROOT=$prefix
 
-#=================================================================#
-#=================================================================#
-# Install parallel NetCDF using parallel HDF5
+
+printf "#=================================================================#\n"
+printf "#=================================================================#\n"
+printf "# Install parallel NetCDF using parallel HDF5\n\n\n"
 
 if [ "$switch_netcdfc" = true ] ; then
 	url=${site_netcdfc}/netcdf-c-${version_netcdfc}.tar.gz
@@ -154,9 +156,9 @@ export NetCDF_C_ROOT=$prefix
 export LD_LIBRARY_PATH=${NetCDF_C_ROOT}/lib:${LD_LIBRARY_PATH}
 
 
-#=================================================================#
-#=================================================================#
-# Install NetCDF Fortran
+printf "#=================================================================#\n"
+printf "#=================================================================#\n"
+printf "# Install NetCDF Fortran\n\n\n"
 
 if [ "$switch_netcdff" = true ] ; then
 	url=${site_netcdff}/netcdf-fortran-${version_netcdff}.tar.gz
@@ -211,40 +213,14 @@ if [ "$switch_eccodes" = true ] ; then
 	make check | tee eccodes_check.out
 
 	make install | tee eccodes_install.out
-	ln -s $prefix/lib64* $prefix/lib/
+	ln -s $prefix/lib64/* $prefix/lib/
 fi
 
 
 #=================================================================#
 #=================================================================#
-# Install Grads
 
-if [ "$switch_grads" = true ] ; then
-	url=${site_grads}/grads-${version_grads}-src.tar.gz
-
-	mkdir -p ${build_dir}
-	pushd ${build_dir}
-
-	wget -nc ${url}
-	tar zxf grads-${version_grads}-src.tar.gz
-
-	pushd grads-${version_grads}
-	FC=${FC} CC=${CC} CPPFLAGS=-I${prefix}/include LDFLAGS=-L${prefix}/lib ./configure \
-		--prefix=${prefix} 2>&1 | tee grads_configure.log
-
-	make all 2>&1 | tee grads_compile.log
-	make install 2>&1 | tee grads_install.log
-
-	popd
-	popd
-
-fi
-export GRADS_ROOT=$prefix
-
-
-
-#=================================================================#
-#=================================================================#
+cp /p/scratch/chhb19/hhb193/miniconda3/bin/cdo ${prefix}/bin/
 
 printf "============================="
 printf "Library installation finished"
