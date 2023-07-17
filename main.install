@@ -7,23 +7,25 @@
 # Configuration
 
 # Which libraries shall be installed?
-switch_zlib=true
-switch_szip=true
-switch_hdf5=true
-switch_netcdfc=true
-switch_netcdff=true
+switch_openmpi=false
+switch_zlib=false
+switch_szip=false
+switch_hdf5=false
+switch_netcdfc=false
+switch_netcdff=false
 switch_eccodes=true
-switch_grads=true
-switch_perl=true
-switch_cdo=true
-switch_nco=true
+switch_grads=false
+switch_perl=false
+switch_cdo=false
+switch_nco=false
 
 # Which versions shall be installed?
+version_openmpi=4.1.5
 version_zlib=1.2.11
 version_szip=2.1.1
 version_hdf5=1.10.5
 version_netcdfc=4.7.4
-version_netcdff=4.5.3
+version_netcdff=4.5.2
 version_eccodes=2.22.1
 version_grads=2.2.1
 version_perl=5.32.0
@@ -31,11 +33,12 @@ version_cdo=1.9.9
 version_nco=5.0.6
 
 # Where should the tarballs be downloaded from?
+site_openmpi=https://download.open-mpi.org/release/open-mpi/v4.1
 site_zlib=https://zlib.net/
 site_szip=https://support.hdfgroup.org/ftp/lib-external/szip/
 site_hdf5=https://support.hdfgroup.org/ftp/HDF5/releases/hdf5-1.10/ #Note: this is the release version, not the package version
-site_netcdfc=ftp://ftp.unidata.ucar.edu/pub/netcdf/
-site_netcdff=ftp://ftp.unidata.ucar.edu/pub/netcdf/
+site_netcdfc=https://github.com/Unidata/netcdf-c/archive/refs/tags/
+site_netcdff=https://github.com/Unidata/netcdf-fortran/archive/refs/tags/
 site_eccodes=https://confluence.ecmwf.int/download/attachments/45757960/
 site_grads=ftp://cola.gmu.edu/grads/2.2/ #Note: this 2.2 is the release version, not the package version
 site_perl=http://www.cpan.org/src/5.0/ #Note: this 5.0 is the release version, not the package version
@@ -48,12 +51,38 @@ site_nco=https://github.com/nco/nco/archive/
 #source config.juwels@fz-juelich.de
 #source config.juwels-2020ps@fz-juelich.de
 #source config.juwels-2020op@fz-juelich.de
-source config.juwels-2022op@fz-juelich.de
+#source config.juwels-2022op@fz-juelich.de
 #source config.mistral@dkrz.de
-#source config.aleph@iccp.kr
+source config.aleph_intel_ompi@iccp.kr
 
 
 # End of user configuration
+#=================================================================#
+#=================================================================#
+# Install OpenMPI
+
+if [ "$switch_openmpi" = true ] ; then
+	url=${site_openmpi}/openmpi-${version_openmpi}.tar.gz
+
+	mkdir -p ${build_dir}
+	pushd ${build_dir}
+
+	wget -nc ${url}
+	tar xzf openmpi-${version_openmpi}.tar.gz
+
+	pushd openmpi-${version_openmpi}
+
+	CC=${CC} CFLAGS=-w ./configure \
+	--prefix=${prefix} 2>&1 | tee openmpi_configure.log
+
+	make all 2>&1 | tee openmpi_compile.log
+	make install 2>&1 | tee openmpi_install.log
+
+	popd
+	popd
+fi
+export OPENMPI_ROOT=$prefix
+
 #=================================================================#
 #=================================================================#
 # Install ZLIB
@@ -140,13 +169,13 @@ export HDF5_ROOT=$prefix
 # Install parallel NetCDF using parallel HDF5
 
 if [ "$switch_netcdfc" = true ] ; then
-	url=${site_netcdfc}/netcdf-c-${version_netcdfc}.tar.gz
+	url=${site_netcdfc}/v${version_netcdfc}.tar.gz
 
 	mkdir -p ${build_dir}
 	pushd ${build_dir}
 
 	wget -nc ${url}
-	tar zxf netcdf-c-${version_netcdfc}.tar.gz
+	tar zxf v${version_netcdfc}.tar.gz
 
 	pushd netcdf-c-${version_netcdfc}
 
@@ -170,13 +199,13 @@ export LD_LIBRARY_PATH=${NetCDF_C_ROOT}/lib:${LD_LIBRARY_PATH}
 # Install NetCDF Fortran
 
 if [ "$switch_netcdff" = true ] ; then
-	url=${site_netcdff}/netcdf-fortran-${version_netcdff}.tar.gz
+	url=${site_netcdff}/v${version_netcdff}.tar.gz
 
 	mkdir -p ${build_dir}
 	pushd ${build_dir}
 
 	wget -nc ${url}
-	tar zxf netcdf-fortran-${version_netcdff}.tar.gz
+	tar zxf v${version_netcdff}.tar.gz
 
 	pushd netcdf-fortran-${version_netcdff}
 	FC=${FC} CC=${CC} CPPFLAGS=-I${prefix}/include LDFLAGS=-L${prefix}/lib ./configure \
