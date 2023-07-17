@@ -10,10 +10,10 @@
 switch_openmpi=false
 switch_zlib=false
 switch_szip=false
-switch_hdf5=false
+switch_hdf5=true
 switch_netcdfc=false
 switch_netcdff=false
-switch_eccodes=true
+switch_eccodes=false
 switch_grads=false
 switch_perl=false
 switch_cdo=false
@@ -73,7 +73,8 @@ if [ "$switch_openmpi" = true ] ; then
 	pushd openmpi-${version_openmpi}
 
 	CC=${CC} CFLAGS=-w ./configure \
-	--prefix=${prefix} 2>&1 | tee openmpi_configure.log
+	--prefix=${prefix} \
+    2>&1 | tee openmpi_configure.log
 
 	make all 2>&1 | tee openmpi_compile.log
 	make install 2>&1 | tee openmpi_install.log
@@ -145,19 +146,21 @@ if [ "$switch_hdf5" = true ] ; then
 	mkdir -p ${build_dir}
 	pushd ${build_dir}
 
-	wget -nc ${url}
-	tar xzf hdf5-${version_hdf5}.tar.gz
+	#wget -nc ${url}
+	#tar xzf hdf5-${version_hdf5}.tar.gz
 
 	pushd hdf5-${version_hdf5}
 
-	CC=${CC} CFLAGS=-w ./configure \
-	  --disable-static \
-	  --enable-parallel \
-	  --enable-fortran \
-	  --prefix=${prefix} 2>&1 | tee hdf5_configure.log
+	#CC=${CC} CFLAGS=-w ./configure \
+	#  --disable-static \
+	#  --enable-parallel \
+	#  --enable-fortran \
+	#  --prefix=${prefix} 2>&1 | tee hdf5_configure.log
 
 	make all 2>&1 | tee hdf5_compile.log
 	make install 2>&1 | tee hdf5_install.log
+
+    ln -s ${build_dir}/hdf5-${version_hdf5}/hdf5/lib/* ${prefix}/lib/
 
 	popd
 	popd
