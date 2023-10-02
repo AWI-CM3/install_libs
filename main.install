@@ -146,12 +146,12 @@ if [ "$switch_hdf5" = true ] ; then
 	mkdir -p ${build_dir}
 	pushd ${build_dir}
 
-	#wget -nc ${url}
-	#tar xzf hdf5-${version_hdf5}.tar.gz
+	wget -nc ${url}
+	tar xzf hdf5-${version_hdf5}.tar.gz
 
 	pushd hdf5-${version_hdf5}
 
-	#CC=${CC} CFLAGS=-w ./configure \
+	#CC=${CC} CPPFLAGS=-I${prefix}/include LDFLAGS=-L${prefix}/lib CFLAGS=-w ./configure \
 	#  --disable-static \
 	#  --enable-parallel \
 	#  --enable-fortran \
