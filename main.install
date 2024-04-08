@@ -7,26 +7,28 @@
 # Configuration
 
 # Which libraries shall be installed?
-switch_openmpi=false
-switch_zlib=false
-switch_szip=false
-switch_hdf5=true
-switch_netcdfc=false
-switch_netcdff=false
-switch_eccodes=false
-switch_grads=false
-switch_perl=false
-switch_cdo=false
-switch_nco=false
+switch_openmpi=
+switch_zlib=
+switch_szip=
+switch_libaec=t
+switch_hdf5=
+switch_netcdfc=
+switch_netcdff=
+switch_eccodes=t
+switch_grads=
+switch_perl=
+switch_cdo=
+switch_nco=
 
 # Which versions shall be installed?
 version_openmpi=4.1.5
-version_zlib=1.2.11
+version_zlib=1.3
 version_szip=2.1.1
+version_libaec=1.1.3
 version_hdf5=1.10.5
 version_netcdfc=4.7.4
 version_netcdff=4.5.2
-version_eccodes=2.22.1
+version_eccodes=2.34.1
 version_grads=2.2.1
 version_perl=5.32.0
 version_cdo=1.9.9
@@ -36,6 +38,7 @@ version_nco=5.0.6
 site_openmpi=https://download.open-mpi.org/release/open-mpi/v4.1
 site_zlib=https://zlib.net/
 site_szip=https://support.hdfgroup.org/ftp/lib-external/szip/
+site_libaec=https://gitlab.dkrz.de/k202009/libaec/-/archive/
 site_hdf5=https://support.hdfgroup.org/ftp/HDF5/releases/hdf5-1.10/ #Note: this is the release version, not the package version
 site_netcdfc=https://github.com/Unidata/netcdf-c/archive/refs/tags/
 site_netcdff=https://github.com/Unidata/netcdf-fortran/archive/refs/tags/
@@ -53,7 +56,9 @@ site_nco=https://github.com/nco/nco/archive/
 #source config.juwels-2020op@fz-juelich.de
 #source config.juwels-2022op@fz-juelich.de
 #source config.mistral@dkrz.de
-source config.aleph_intel_ompi@iccp.kr
+#source config.aleph_intel_ompi@iccp.kr
+#source config.levante_intel@dkrz.de
+source config.levante_intel_systemlibs.dkrz.de
 
 
 # End of user configuration
@@ -61,7 +66,7 @@ source config.aleph_intel_ompi@iccp.kr
 #=================================================================#
 # Install OpenMPI
 
-if [ "$switch_openmpi" = true ] ; then
+if [ "$switch_openmpi" = t ] ; then
 	url=${site_openmpi}/openmpi-${version_openmpi}.tar.gz
 
 	mkdir -p ${build_dir}
@@ -88,7 +93,7 @@ export OPENMPI_ROOT=$prefix
 #=================================================================#
 # Install ZLIB
 
-if [ "$switch_zlib" = true ] ; then
+if [ "$switch_zlib" = t ] ; then
 	url=${site_zlib}/zlib-${version_zlib}.tar.gz
 
 	mkdir -p ${build_dir}
@@ -110,16 +115,18 @@ if [ "$switch_zlib" = true ] ; then
 fi
 export ZLIB_ROOT=$prefix
 
+
 #=================================================================#
 #=================================================================#
 # Install SZIP
 
-if [ "$switch_szip" = true ] ; then
+if [ "$switch_szip" = t ] ; then
 	url=${site_szip}/${version_szip}/src/szip-${version_szip}.tar.gz
 
 	mkdir -p ${build_dir}
 	pushd ${build_dir}
 
+  echo ${url}
 	wget -nc ${url}
 	tar xzf szip-${version_szip}.tar.gz
 
@@ -136,11 +143,44 @@ if [ "$switch_szip" = true ] ; then
 fi
 export SZIP_ROOT=$prefix
 
+
+#=================================================================#
+#=================================================================#
+# Install LIBAEC
+
+if [ "$switch_libaec" = t ] ; then
+	url=${site_libaec}/v${version_libaec}/libaec-${version_libaec}.tar.gz
+
+	mkdir -p ${build_dir}
+	pushd ${build_dir}
+
+	wget -nc ${url}
+	tar xzf libaec-${version_libaec}.tar.gz
+  mv libaec-v${version_libaec}-* libaec-${version_libaec}
+
+	pushd libaec-${version_libaec}
+  
+  cmake DCMAKE_INSTALL_PREFIX=${prefix} . 2>&1 | tee libaec_configure.log
+	make all 2>&1 | tee libaec_compile.log
+  make install DESTDIR=${prefix} prefix=${prefix} 2>&1 | tee libaec_install.log
+
+  mkdir -p ${prefix}/lib/
+  mkdir -p ${prefix}/include/
+
+  cp ${prefix}/usr/local/lib64/* ${prefix}/lib/
+  cp ${prefix}/usr/local/include/* ${prefix}/include/
+
+	popd
+	popd
+fi
+export AEC_ROOT=$prefix
+export LIBAEC_ROOT=$prefix
+
 #=================================================================#
 #=================================================================#
 # Install HDF5 1.10.5 with parallel I/O 
 
-if [ "$switch_hdf5" = true ] ; then
+if [ "$switch_hdf5" = t ] ; then
 	url=${site_hdf5}/hdf5-${version_hdf5}/src/hdf5-${version_hdf5}.tar.gz
 
 	mkdir -p ${build_dir}
@@ -160,8 +200,12 @@ if [ "$switch_hdf5" = true ] ; then
 	make all 2>&1 | tee hdf5_compile.log
 	make install 2>&1 | tee hdf5_install.log
 
-    ln -s ${build_dir}/hdf5-${version_hdf5}/hdf5/lib/* ${prefix}/lib/
+  mkdir -p ${prefix}/lib
+  mkdir -p ${prefix}/include
 
+  ln -s ${build_dir}/hdf5-${version_hdf5}/hdf5/lib/* ${prefix}/lib/
+  ln -s ${build_dir}/hdf5-${version_hdf5}/hdf5/include/* ${prefix}/include/
+  
 	popd
 	popd
 fi
@@ -171,7 +215,7 @@ export HDF5_ROOT=$prefix
 #=================================================================#
 # Install parallel NetCDF using parallel HDF5
 
-if [ "$switch_netcdfc" = true ] ; then
+if [ "$switch_netcdfc" = t ] ; then
 	url=${site_netcdfc}/v${version_netcdfc}.tar.gz
 
 	mkdir -p ${build_dir}
@@ -201,7 +245,7 @@ export LD_LIBRARY_PATH=${NetCDF_C_ROOT}/lib:${LD_LIBRARY_PATH}
 #=================================================================#
 # Install NetCDF Fortran
 
-if [ "$switch_netcdff" = true ] ; then
+if [ "$switch_netcdff" = t ] ; then
 	url=${site_netcdff}/v${version_netcdff}.tar.gz
 
 	mkdir -p ${build_dir}
@@ -211,7 +255,7 @@ if [ "$switch_netcdff" = true ] ; then
 	tar zxf v${version_netcdff}.tar.gz
 
 	pushd netcdf-fortran-${version_netcdff}
-	FC=${FC} CC=${CC} CPPFLAGS=-I${prefix}/include LDFLAGS=-L${prefix}/lib ./configure \
+	FC=${FC} CC=${CC} FCFLAGS=${FCFLAGS} CPPFLAGS=-I${prefix}/include LDFLAGS=-L${prefix}/lib ./configure \
 		--prefix=${prefix} 2>&1 | tee netcdff_configure.log
 
 	make all 2>&1 | tee netcdff_compile.log
@@ -227,7 +271,7 @@ export NetCDF_FORTRAN_ROOT=$prefix
 #=================================================================#
 #Installing eccodes
 
-if [ "$switch_eccodes" = true ] ; then
+if [ "$switch_eccodes" = t ] ; then
 	url=${site_eccodes}/eccodes-${version_eccodes}-Source.tar.gz
 
 	mkdir -p ${build_dir}
@@ -241,12 +285,13 @@ if [ "$switch_eccodes" = true ] ; then
 	      -DCMAKE_Fortran_COMPILER=${FC} \
 	      -DCMAKE_INSTALL_PREFIX:PATH=${prefix}   \
 	      -DENABLE_NETCDF=ON              \
+	      -DENABLE_AEC=ON                 \
 	      -DENABLE_ECCODES_OMP_THREADS=ON \
 	      -DENABLE_JPG=OFF                \
 	      -DENABLE_PNG=OFF                \
 	      -DENABLE_PYTHON=ON              \
 	      -DENABLE_FORTRAN=ON             \
-          -DECBUILD_DISABLE_RPATH_FIX=ON  \
+        -DECBUILD_DISABLE_RPATH_FIX=ON  \
 	      -DBUILD_SHARED_LIBS=BOTH
 
 	make -j 4 | tee eccodes_make.out
@@ -262,7 +307,7 @@ fi
 #=================================================================#
 # Install Grads
 
-if [ "$switch_grads" = true ] ; then
+if [ "$switch_grads" = t ] ; then
 	url=${site_grads}/grads-${version_grads}-src.tar.gz
 
 	mkdir -p ${build_dir}
@@ -290,7 +335,7 @@ export GRADS_ROOT=$prefix
 
 # Install Perl
 
-if [ "$switch_perl" = true ] ; then
+if [ "$switch_perl" = t ] ; then
 	url=${site_perl}/perl-${version_perl}.tar.gz
 
 	mkdir -p ${build_dir}
@@ -318,7 +363,7 @@ export PERL_ROOT=$prefix
 
 # Install CDO
 
-if [ "$switch_cdo" = true ] ; then
+if [ "$switch_cdo" = t ] ; then
 	url=${site_cdo}/cdo-${version_cdo}.tar.gz
 
 	mkdir -p ${build_dir}
@@ -328,7 +373,7 @@ if [ "$switch_cdo" = true ] ; then
 	tar zxf cdo-${version_cdo}.tar.gz
 
 	pushd cdo-${version_cdo}
-	./configure CPPFLAGS='' CFLAGS="" FCFLAGS="" CC=${CC} CXX=$CXX CPP="$CXX -E" LDFLAGS="$LDFLAGS -L${prefix}/lib -Wl,-rpath=${prefix}/lib" --prefix=${prefix} --with-szlib=${prefix} --with-netcdf=${prefix} --with-hdf5=${prefix} --enable-hirlam-extensions=yes --with-eccodes=${prefix}
+	./configure FC=${FC} F77=${F77} CPPFLAGS='' CFLAGS="" FCFLAGS="" CC=${CC} CXX=$CXX CPP="$CXX -E" LDFLAGS="$LDFLAGS -L${prefix}/lib -Wl,-rpath=${prefix}/lib" --prefix=${prefix} --with-szlib=${prefix} --disable-cgribex --with-netcdf=${prefix} --with-hdf5=${prefix} --enable-hirlam-extensions=yes --with-eccodes=${prefix}
 
 	make -j24 2>&1 | tee cdo_compile.log
 	make install 2>&1 | tee cdo_install.log
@@ -344,7 +389,7 @@ export CDO_ROOT=$prefix
 
 # Install NCO
 
-if [ "$switch_nco" = true ] ; then
+if [ "$switch_nco" = t ] ; then
 	url=${site_nco}/${version_nco}.tar.gz
 
 	mkdir -p ${build_dir}
