@@ -1,0 +1,17 @@
+#!/bin/bash
+# What are the installation paths? 
+prefix=/p/project/chhb19/streffing1/software/HPC_libraries/intel2021.2.0_parastation_5.4.10-1-mt_20210929/
+build_dir=/p/project/chhb19/streffing1/software/HPC_libraries/intel2021.2.0_parastation_5.4.10-1-mt_20210929/build/
+ 
+# Which modules shall be loaded from the HPC system 
+module --force purge
+module use /gpfs/software/juwels/otherstages
+module load Stages/2020
+module load Intel/2021.2.0-GCC-10.3.0
+module load ParaStationMPI/5.4.10-1-mt
+module load CMake/3.18.0
+module load imkl/2021.2.0
+module load Perl/5.32.0
+
+CC=mpicc
+FC=mpifort
