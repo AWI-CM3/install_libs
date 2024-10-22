@@ -10,7 +10,7 @@
 switch_openmpi=
 switch_zlib=
 switch_szip=
-switch_libaec=t
+switch_libaec=
 switch_hdf5=
 switch_netcdfc=
 switch_netcdff=
@@ -22,12 +22,12 @@ switch_nco=
 
 # Which versions shall be installed?
 version_openmpi=4.1.5
-version_zlib=1.3
+version_zlib=1.3.1
 version_szip=2.1.1
 version_libaec=1.1.3
-version_hdf5=1.10.5
-version_netcdfc=4.7.4
-version_netcdff=4.5.2
+version_hdf5=1.14.3
+version_netcdfc=4.9.0
+version_netcdff=4.6.1
 version_eccodes=2.34.1
 version_grads=2.2.1
 version_perl=5.32.0
@@ -39,7 +39,7 @@ site_openmpi=https://download.open-mpi.org/release/open-mpi/v4.1
 site_zlib=https://zlib.net/
 site_szip=https://support.hdfgroup.org/ftp/lib-external/szip/
 site_libaec=https://gitlab.dkrz.de/k202009/libaec/-/archive/
-site_hdf5=https://support.hdfgroup.org/ftp/HDF5/releases/hdf5-1.10/ #Note: this is the release version, not the package version
+site_hdf5=https://support.hdfgroup.org/ftp/HDF5/releases/hdf5-1.14/ #Note: this is the release version, not the package version
 site_netcdfc=https://github.com/Unidata/netcdf-c/archive/refs/tags/
 site_netcdff=https://github.com/Unidata/netcdf-fortran/archive/refs/tags/
 site_eccodes=https://confluence.ecmwf.int/download/attachments/45757960/
@@ -57,9 +57,9 @@ site_nco=https://github.com/nco/nco/archive/
 #source config.juwels-2022op@fz-juelich.de
 #source config.mistral@dkrz.de
 #source config.aleph_intel_ompi@iccp.kr
-#source config.levante_intel@dkrz.de
-source config.levante_intel_systemlibs.dkrz.de
-
+#source config.levante_gnu@dkrz.de2
+#source config.levante_intel_systemlibs.dkrz.de
+source config.levante_intel_for_ece4@dkrz.de
 
 # End of user configuration
 #=================================================================#
@@ -173,8 +173,8 @@ if [ "$switch_libaec" = t ] ; then
 	popd
 	popd
 fi
-export AEC_ROOT=$prefix
-export LIBAEC_ROOT=$prefix
+export AEC_ROOT=/sw/spack-levante/libaec-1.0.5-gij7yv/
+export LIBAEC_ROOT=/sw/spack-levante/libaec-1.0.5-gij7yv/
 
 #=================================================================#
 #=================================================================#
@@ -237,7 +237,7 @@ if [ "$switch_netcdfc" = t ] ; then
 	popd
 	popd
 fi
-export NetCDF_C_ROOT=$prefix
+export NetCDF_C_ROOT="/work/ab0995/a270270/software/netcdf_combined"
 export LD_LIBRARY_PATH=${NetCDF_C_ROOT}/lib:${LD_LIBRARY_PATH}
 
 
@@ -264,7 +264,7 @@ if [ "$switch_netcdff" = t ] ; then
 	popd
 	popd
 fi
-export NetCDF_FORTRAN_ROOT=$prefix
+export NetCDF_FORTRAN_ROOT="/work/ab0995/a270270/software/netcdf_combined"
 
 
 #=================================================================#
